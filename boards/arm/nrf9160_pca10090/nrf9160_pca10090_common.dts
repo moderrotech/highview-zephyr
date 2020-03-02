@@ -99,11 +99,11 @@
 
 &uart1 {
 	status = "okay";
-	current-speed = <115200>;
-	tx-pin = <5>;
-	rx-pin = <8>;
-	rts-pin = <24>;
-	cts-pin = <25>;
+	current-speed = <1000000>;
+	tx-pin = <18>;
+	rx-pin = <19>;
+	rts-pin = <20>;
+	cts-pin = <21>;
 };
 
 &uart2 {
