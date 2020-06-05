@@ -33,6 +33,7 @@
 // Kai: code for upgrading 52840 firmware
 
 #include <drivers/gpio.h>
+#include <dfu/mcuboot.h>
 #include <lte_uart_dfu.h>
 
 #define MY_BLE_APP_VERSION				0x1000		// 1.0.0
@@ -381,8 +382,20 @@ DEVICE_INIT(hci_uart, "hci_uart", &hci_uart_init, NULL, NULL,
 
 void main(void)
 {
+
+
+// ********************************************************************************************** begin
+// Kai: code for upgrading 52840 firmware
+
 	printk("BLE app v%u.%u.%u\n", MY_BLE_APP_VERSION >> 12, (MY_BLE_APP_VERSION >> 8) & 0xF, MY_BLE_APP_VERSION & 0xFF);
 	my_check_upgrade();
+
+	// mark application upgrade success (automatically check if needed inside this function)
+	boot_write_img_confirmed();
+
+// ********************************************************************************************** end
+
+
 
 	/* incoming events and data from the controller */
 	static K_FIFO_DEFINE(rx_queue);
