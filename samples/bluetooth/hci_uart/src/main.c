@@ -51,7 +51,7 @@ static void my_check_upgrade(void)
 	gpio_pin_read(gpio_dev, MY_GPIO_HOST_UPGRADE_52840, &gpio_status);
 	if (gpio_status)
 	{
-		printk("start upgrade...");
+		printk("start upgrade...\n");
 		lte_uart_dfu_start();		// this function won't return
 	}
 }
