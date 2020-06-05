@@ -388,10 +388,11 @@ void main(void)
 // Kai: code for upgrading 52840 firmware
 
 	printk("BLE app v%u.%u.%u\n", MY_BLE_APP_VERSION >> 12, (MY_BLE_APP_VERSION >> 8) & 0xF, MY_BLE_APP_VERSION & 0xFF);
-	my_check_upgrade();
 
 	// mark application upgrade success (automatically check if needed inside this function)
 	boot_write_img_confirmed();
+	
+	my_check_upgrade();
 
 // ********************************************************************************************** end
 
