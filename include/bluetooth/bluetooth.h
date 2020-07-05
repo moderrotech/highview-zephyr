@@ -64,6 +64,15 @@ typedef void (*bt_ready_cb_t)(int err);
  */
 int bt_enable(bt_ready_cb_t cb);
 
+
+
+/** @brief read fw version of 52840. added by Kai
+ *
+ */
+u16_t bt_read_version_52840(void);
+
+
+
 /** @brief Set Bluetooth Device Name
  *
  *  Set Bluetooth GAP Device Name.

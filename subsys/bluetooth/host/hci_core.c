@@ -4783,6 +4783,41 @@ static void hci_vs_init(void)
 }
 #endif /* CONFIG_BT_HCI_VS_EXT */
 
+
+
+//******************************************************************  added by Kai ---- begin
+
+static u16_t my_52840_ver = 0;
+
+u16_t bt_read_version_52840(void)
+{
+	return my_52840_ver;
+}
+
+static void kai_hci_vs_init(void)		// originates from hci_vs_init()
+{
+	struct bt_hci_rp_vs_read_version_info *info;
+	struct net_buf *rsp;
+	int err;
+
+	err = bt_hci_cmd_send_sync(BT_HCI_OP_VS_READ_VERSION_INFO, NULL, &rsp);
+	if (err) {
+		BT_WARN("Vendor HCI extensions not available");
+		return;
+	}
+
+	info = (void *)rsp->data;
+	my_52840_ver = info->fw_version & 0x0f;
+	my_52840_ver = (my_52840_ver << 4) | (info->fw_revision & 0x0f);
+	my_52840_ver = (my_52840_ver << 8) | (info->fw_build & 0xff);
+
+	net_buf_unref(rsp);
+}
+
+//****************************************************************** added by Kai ---- end
+
+
+
 static int hci_init(void)
 {
 	int err;
@@ -4811,6 +4846,10 @@ static int hci_init(void)
 	if (err) {
 		return err;
 	}
+
+
+	kai_hci_vs_init();	// added by Kai
+
 
 #if defined(CONFIG_BT_HCI_VS_EXT)
 	hci_vs_init();
