@@ -1857,9 +1857,9 @@ static void vs_read_version_info(struct net_buf *buf, struct net_buf **evt)
 	rp->hw_variant = sys_cpu_to_le16(BT_HCI_VS_HW_VAR);
 
 	rp->fw_variant = 0U;
-	rp->fw_version = (KERNEL_VERSION_MAJOR & 0xff);
-	rp->fw_revision = sys_cpu_to_le16(KERNEL_VERSION_MINOR);
-	rp->fw_build = sys_cpu_to_le32(KERNEL_PATCHLEVEL & 0xffff);
+	rp->fw_version = KAI_VERSION_MAJOR;
+	rp->fw_revision = sys_cpu_to_le16(KAI_VERSION_MINOR);
+	rp->fw_build = sys_cpu_to_le32(KAI_VERSION_BUILD);
 }
 
 static void vs_read_supported_commands(struct net_buf *buf,

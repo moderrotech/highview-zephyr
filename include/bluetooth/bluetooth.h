@@ -53,6 +53,19 @@ extern "C" {
  */
 typedef void (*bt_ready_cb_t)(int err);
 
+
+
+//************************************************************ added by Kai begin
+
+// firmware version
+#define KAI_VERSION_MAJOR		5
+#define KAI_VERSION_MINOR		0
+#define KAI_VERSION_BUILD		200
+
+//************************************************************ added by Kai end
+
+
+
 /** @brief Enable Bluetooth
  *
  *  Enable Bluetooth. Must be the called before any calls that

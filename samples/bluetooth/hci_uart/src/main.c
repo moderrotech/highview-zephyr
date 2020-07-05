@@ -36,8 +36,6 @@
 #include <dfu/mcuboot.h>
 #include <lte_uart_dfu.h>
 
-#define MY_BLE_APP_VERSION				0x1000		// 1.0.0
-
 #define MY_GPIO_HOST_UPGRADE_52840	22
 
 static void my_check_upgrade(void)
@@ -387,7 +385,7 @@ void main(void)
 // ********************************************************************************************** begin
 // Kai: code for upgrading 52840 firmware
 
-	printk("BLE app v%u.%u.%u\n", MY_BLE_APP_VERSION >> 12, (MY_BLE_APP_VERSION >> 8) & 0xF, MY_BLE_APP_VERSION & 0xFF);
+	printk("BLE app v%u.%u.%u\n", KAI_VERSION_MAJOR, KAI_VERSION_MINOR, KAI_VERSION_BUILD);
 
 	// mark application upgrade success (automatically check if needed inside this function)
 	boot_write_img_confirmed();
