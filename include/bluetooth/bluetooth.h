@@ -60,7 +60,7 @@ typedef void (*bt_ready_cb_t)(int err);
 // firmware version
 #define KAI_VERSION_MAJOR		5
 #define KAI_VERSION_MINOR		0
-#define KAI_VERSION_BUILD		200
+#define KAI_VERSION_BUILD		0
 
 //************************************************************ added by Kai end
 
