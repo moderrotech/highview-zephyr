@@ -742,7 +742,7 @@ static void rx_timeout(struct k_timer *timer)
 	 : 0)
 
 static void error_isr(const struct device *dev)
-{
+{return;
 	NRF_UARTE_Type *uarte = get_uarte_instance(dev);
 	uint32_t err = nrf_uarte_errorsrc_get_and_clear(uarte);
 	struct uart_event evt = {
