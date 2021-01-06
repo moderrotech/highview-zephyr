@@ -90,19 +90,19 @@
 &uart0 {
 	status = "okay";
 	current-speed = <115200>;
-	tx-pin = <29>;
-	rx-pin = <28>;
-	rts-pin = <27>;
-	cts-pin = <26>;
+	tx-pin = <27>;
+	rx-pin = <26>;
+	rts-pin = <13>;
+	cts-pin = <14>;
 };
 
 &uart1 {
 	status = "okay";
 	current-speed = <115200>;
-	tx-pin = <1>;
-	rx-pin = <0>;
-	rts-pin = <14>;
-	cts-pin = <15>;
+	tx-pin = <29>;
+	rx-pin = <28>;
+	rts-pin = <30>;
+	cts-pin = <31>;
 };
 
 &uart2 {
@@ -113,13 +113,13 @@
 &i2c2 {
 	compatible = "nordic,nrf-twim";
 	status = "okay";
-	sda-pin = <30>;
-	scl-pin = <31>;
+	sda-pin = <15>;
+	scl-pin = <16>;
 };
 
 &pwm0 {
 	status = "okay";
-	ch0-pin = <2>;
+	ch0-pin = <17>;
 };
 
 &spi3 {
