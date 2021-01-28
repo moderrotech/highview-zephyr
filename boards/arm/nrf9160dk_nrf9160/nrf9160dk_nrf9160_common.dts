@@ -101,8 +101,8 @@
 	current-speed = <115200>;
 	tx-pin = <29>;
 	rx-pin = <28>;
-	rts-pin = <30>;
-	cts-pin = <31>;
+	rts-pin = <31>;
+	cts-pin = <30>;
 };
 
 &uart2 {
