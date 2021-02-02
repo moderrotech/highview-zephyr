@@ -119,19 +119,6 @@ struct bt_le_ext_adv_cb {
  */
 typedef void (*bt_ready_cb_t)(int err);
 
-
-
-//************************************************************ added by Kai begin
-
-// firmware version
-#define KAI_VERSION_MAJOR		6
-#define KAI_VERSION_MINOR		0
-#define KAI_VERSION_BUILD		0
-
-//************************************************************ added by Kai end
-
-
-
 /**
  * @brief Enable Bluetooth
  *

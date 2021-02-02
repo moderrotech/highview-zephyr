@@ -254,6 +254,60 @@ static void bt_uart_isr(const struct device *unused, void *user_data)
 	}
 }
 
+
+
+//************************************************************ added by Kai begin
+
+// firmware version
+#define KAI_VERSION_MAJOR		6
+#define KAI_VERSION_MINOR		0
+#define KAI_VERSION_BUILD		200
+
+
+// It used to work by modifying vs_read_version_info() in hci.c. However it works for Zephyr BLE controller only, not for SoftDevice Controller. That's why we need the following code.
+static inline void my_hci_op_vs_read_version_info(struct net_buf *buf)
+{
+	// check if it is BT_HCI_OP_VS_READ_VERSION_INFO (0xfc01)
+	{
+		uint8_t *p2 = buf->data;
+		if (	buf->len != 3 || 		// length of total
+			p2[0] != 1 || 		// opcode-1
+			p2[1] != 0xfc || 		// opcode-2
+			p2[2] != 0)			// length of payload
+			return;
+	}
+	
+	static uint8_t cmd[24];
+	uint8_t *p3 = cmd;
+	*p3 = 0x04;					p3 ++;		// type: H4_EVT
+	*p3 = 0x0e;					p3 ++;		// event: BT_HCI_EVT_CMD_COMPLETE
+								p3 ++;		// length of payload
+	*p3 = 0x01;					p3 ++;		// ncmd (payload starts here)
+	*p3 = 0x01;					p3 ++;		// opcode: BT_HCI_OP_VS_READ_VERSION_INFO
+	*p3 = 0xfc;					p3 ++;		// opcode
+	*p3 = 0x00;					p3 ++;		// bt_hci_rp_vs_read_version_info -- status
+	*p3 = 0x00;					p3 ++;		// hw_platform - 1
+	*p3 = 0x00;					p3 ++;		// hw_platform - 2
+	*p3 = 0x00;					p3 ++;		// hw_variant - 1
+	*p3 = 0x00;					p3 ++;		// hw_variant - 2
+	*p3 = 0x00;					p3 ++;		// fw_variant
+	*p3 = KAI_VERSION_MAJOR;	p3 ++;		// fw_version
+	*p3 = KAI_VERSION_MINOR;	p3 ++;		// fw_revision - 1
+	*p3 = 0x00;					p3 ++;		// fw_revision - 2
+	*p3 = KAI_VERSION_BUILD;		p3 ++;		// fw_build - 1
+	*p3 = 0x00;					p3 ++;		// fw_build - 2
+	*p3 = 0x00;					p3 ++;		// fw_build - 3
+	*p3 = 0x00;					p3 ++;		// fw_build - 4
+	uint32_t cmd_len = (uint32_t) (p3 - cmd);
+	cmd[2] = cmd_len - 3;
+	int sent_len = uart_fifo_fill(hci_uart_dev, cmd, cmd_len);
+	printk("%s() sent %d bytes\n", __FUNCTION__, sent_len);
+}
+
+//************************************************************ added by Kai end
+
+
+
 static void tx_thread(void *p1, void *p2, void *p3)
 {
 	while (1) {
@@ -262,6 +316,12 @@ static void tx_thread(void *p1, void *p2, void *p3)
 
 		/* Wait until a buffer is available */
 		buf = net_buf_get(&tx_queue, K_FOREVER);
+
+
+		// added by Kai
+		my_hci_op_vs_read_version_info(buf);
+
+
 		/* Pass buffer to the stack */
 		err = bt_send(buf);
 		if (err) {
