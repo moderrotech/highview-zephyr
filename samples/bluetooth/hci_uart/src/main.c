@@ -40,7 +40,7 @@
 
 
 // It used to work by modifying vs_read_version_info() in hci.c. However it works for Zephyr BLE controller only, not for SoftDevice Controller. That's why we need the following code.
-static inline void my_hci_op_vs_read_version_info(struct net_buf *buf, const struct device *uart_dev)
+static inline bool my_hci_op_vs_read_version_info(struct net_buf *buf, const struct device *uart_dev)
 {
 	// check if it is BT_HCI_OP_VS_READ_VERSION_INFO (0xfc01)
 	{
@@ -49,7 +49,7 @@ static inline void my_hci_op_vs_read_version_info(struct net_buf *buf, const str
 			p2[0] != 1 || 		// opcode-1
 			p2[1] != 0xfc || 		// opcode-2
 			p2[2] != 0)			// length of payload
-			return;
+			return false;
 	}
 	
 	static uint8_t cmd[24];
@@ -77,6 +77,7 @@ static inline void my_hci_op_vs_read_version_info(struct net_buf *buf, const str
 	cmd[2] = cmd_len - 3;
 	int sent_len = uart_fifo_fill(uart_dev, cmd, cmd_len);
 	printk("%s() sent %d bytes\n", __FUNCTION__, sent_len);
+	return true;
 }
 
 // **********************************************************************************************  end
@@ -319,14 +320,17 @@ static void tx_thread(void *p1, void *p2, void *p3)
 
 
 		// added by Kai
-		my_hci_op_vs_read_version_info(buf, hci_uart_dev);
-
-
-		/* Pass buffer to the stack */
-		err = bt_send(buf);
-		if (err) {
-			LOG_ERR("Unable to send (err %d)", err);
+		if (my_hci_op_vs_read_version_info(buf, hci_uart_dev))
+		{
 			net_buf_unref(buf);
+		} else
+		{
+			/* Pass buffer to the stack */
+			err = bt_send(buf);
+			if (err) {
+				LOG_ERR("Unable to send (err %d)", err);
+				net_buf_unref(buf);
+			}
 		}
 
 		/* Give other threads a chance to run if tx_queue keeps getting
