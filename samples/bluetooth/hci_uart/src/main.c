@@ -91,7 +91,7 @@ static inline bool my_hci_op_vs_read_version_info(struct net_buf *buf, const str
 #include <dfu/mcuboot.h>
 #include <lte_uart_dfu.h>
 
-#define MY_GPIO_HOST_UPGRADE_52840	22
+#define MY_GPIO_HOST_UPGRADE_52840	15
 
 static inline void my_check_upgrade(void)
 {
