@@ -32,12 +32,18 @@
 // ********************************************************************************************** begin
 // Kai: for firmware version report
 
+#define MY_BLE_MANUFACTURE_TESTING_MODE	false
 
 // firmware version
-#define KAI_VERSION_MAJOR		6
+#if MY_BLE_MANUFACTURE_TESTING_MODE
+#define KAI_VERSION_MAJOR		0
 #define KAI_VERSION_MINOR		0
-#define KAI_VERSION_BUILD		200
-
+#define KAI_VERSION_BUILD		1
+#else
+#define KAI_VERSION_MAJOR		1
+#define KAI_VERSION_MINOR		0
+#define KAI_VERSION_BUILD		0
+#endif
 
 // It used to work by modifying vs_read_version_info() in hci.c. However it works for Zephyr BLE controller only, not for SoftDevice Controller. That's why we need the following code.
 static inline bool my_hci_op_vs_read_version_info(struct net_buf *buf, const struct device *uart_dev)
@@ -110,6 +116,54 @@ static inline void my_check_upgrade(void)
 }
 
 // **********************************************************************************************  end
+
+
+
+// ********************************************************************************************** begin
+// Kai: code for manufacture testing
+
+#define MY_BLE_MANUFACTURE_TESTING_MODE	false
+
+#if MY_BLE_MANUFACTURE_TESTING_MODE
+
+static void my_manufacture_test_gpio(void)
+{
+	printk("manufacture testing GPIO begin\n");
+
+	const struct device *gpio_dev = device_get_binding("GPIO_0");
+	if (gpio_dev == 0) 
+		printk("ERROR: %s(): GPIO bind\n", __FUNCTION__);
+
+	uint32_t gpio_list[] = {2, 13, 14, 15};
+	uint32_t gpio_num = sizeof(gpio_list) / sizeof(gpio_list[0]);
+
+	for (int k=0; k < gpio_num; k++)
+	{
+		gpio_pin_configure(gpio_dev, gpio_list[k], GPIO_OUTPUT_LOW);
+	}
+
+	int value = 1;
+	for (int n=0; n < 5; n++)
+	{
+		k_sleep(K_MSEC(200));
+		for (int k=0; k < gpio_num; k++)
+		{
+			gpio_pin_set_raw(gpio_dev, gpio_list[k], value);
+		}
+		if (value)
+			value = 0;
+		else
+			value = 1;
+	}
+
+	k_sleep(K_MSEC(1000));
+	printk("manufacture testing GPIO end\n");
+}
+
+#endif
+
+// **********************************************************************************************  end
+
 
 
 
@@ -423,6 +477,16 @@ DEVICE_INIT(hci_uart, "hci_uart", &hci_uart_init, NULL, NULL,
 
 void main(void)
 {
+
+// ********************************************************************************************** begin
+// Kai: code for manufacture testing
+
+#if MY_BLE_MANUFACTURE_TESTING_MODE
+	my_manufacture_test_gpio();
+#endif
+
+// ********************************************************************************************** end
+
 
 
 // ********************************************************************************************** begin
