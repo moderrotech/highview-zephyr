@@ -372,7 +372,10 @@ int bt_hci_cmd_send_sync(uint16_t opcode, struct net_buf *buf,
 	net_buf_put(&bt_dev.cmd_tx_queue, buf);
 
 	err = k_sem_take(&sync_sem, HCI_CMD_TIMEOUT);
+/*
+Kai: this causes reboot if 52840 has not response
 	BT_ASSERT_MSG(err == 0, "k_sem_take failed with err %d", err);
+*/
 
 	status = cmd(buf)->status;
 	if (status) {
