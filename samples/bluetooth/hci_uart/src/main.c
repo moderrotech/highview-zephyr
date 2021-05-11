@@ -40,7 +40,7 @@
 #define KAI_VERSION_MINOR		0
 #define KAI_VERSION_BUILD		1
 #else
-#define KAI_VERSION_MAJOR		1
+#define KAI_VERSION_MAJOR		2
 #define KAI_VERSION_MINOR		0
 #define KAI_VERSION_BUILD		0
 #endif
