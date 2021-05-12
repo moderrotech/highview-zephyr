@@ -32,7 +32,7 @@
 // ********************************************************************************************** begin
 // Kai: for firmware version report
 
-#define MY_BLE_MANUFACTURE_TESTING_MODE	true
+#define MY_BLE_MANUFACTURE_TESTING_MODE	false
 
 // firmware version
 #if MY_BLE_MANUFACTURE_TESTING_MODE
