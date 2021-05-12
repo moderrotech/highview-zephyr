@@ -32,7 +32,7 @@
 // ********************************************************************************************** begin
 // Kai: for firmware version report
 
-#define MY_BLE_MANUFACTURE_TESTING_MODE	false
+#define MY_BLE_MANUFACTURE_TESTING_MODE	true
 
 // firmware version
 #if MY_BLE_MANUFACTURE_TESTING_MODE
@@ -121,8 +121,6 @@ static inline void my_check_upgrade(void)
 
 // ********************************************************************************************** begin
 // Kai: code for manufacture testing
-
-#define MY_BLE_MANUFACTURE_TESTING_MODE	false
 
 #if MY_BLE_MANUFACTURE_TESTING_MODE
 
