@@ -6,5 +6,5 @@
 config BOARD_ENABLE_DCDC
 	bool "Enable DCDC mode"
 	select SOC_DCDC_NRF52X
-	default y
+	default n
 	depends on BOARD_NRF52840DK_NRF52840
