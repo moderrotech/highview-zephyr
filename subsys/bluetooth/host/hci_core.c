@@ -3260,9 +3260,9 @@ static void hci_vs_init(void)
 
 //******************************************************************  added by Kai ---- begin
 
-static u16_t my_52840_ver = 0;
+static uint16_t my_52840_ver = 0;
 
-u16_t bt_read_version_52840(void)
+uint16_t bt_read_version_52840(void)
 {
 	return my_52840_ver;
 }
