@@ -1082,7 +1082,8 @@ bt_security_t bt_conn_get_security(struct bt_conn *conn)
 
 void bt_conn_cb_register(struct bt_conn_cb *cb)
 {
-	cb->_next = callback_list;
+//	cb->_next = callback_list;
+	cb->_next = NULL;			// Kai: allow only one callback
 	callback_list = cb;
 }
 
