@@ -27,6 +27,37 @@
 #include <bluetooth/buf.h>
 #include <bluetooth/hci_raw.h>
 
+
+
+// ********************************************************************************************** begin
+// Kai: code for upgrading 52840 firmware
+
+#include <drivers/gpio.h>
+#include <dfu/mcuboot.h>
+#include <lte_uart_dfu.h>
+
+#define MY_GPIO_HOST_UPGRADE_52840	22
+
+static void my_check_upgrade(void)
+{
+	u32_t gpio_status;
+	struct device *gpio_dev = device_get_binding(DT_GPIO_P0_DEV_NAME);
+	if (gpio_dev == 0) 
+		printk("ERROR: %s(): GPIO bind\n", __FUNCTION__);
+	gpio_pin_configure(gpio_dev, MY_GPIO_HOST_UPGRADE_52840, GPIO_DIR_IN);
+	k_sleep(100);
+	gpio_pin_read(gpio_dev, MY_GPIO_HOST_UPGRADE_52840, &gpio_status);
+	if (gpio_status)
+	{
+		printk("start upgrade...\n");
+		lte_uart_dfu_start();		// this function won't return
+	}
+}
+
+// **********************************************************************************************  end
+
+
+
 #define LOG_MODULE_NAME hci_uart
 LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 
@@ -349,6 +380,22 @@ DEVICE_INIT(hci_uart, "hci_uart", &hci_uart_init, NULL, NULL,
 
 void main(void)
 {
+
+
+// ********************************************************************************************** begin
+// Kai: code for upgrading 52840 firmware
+
+	printk("BLE app v%u.%u.%u\n", KAI_VERSION_MAJOR, KAI_VERSION_MINOR, KAI_VERSION_BUILD);
+
+	// mark application upgrade success (automatically check if needed inside this function)
+	boot_write_img_confirmed();
+	
+	my_check_upgrade();
+
+// ********************************************************************************************** end
+
+
+
 	/* incoming events and data from the controller */
 	static K_FIFO_DEFINE(rx_queue);
 	int err;
