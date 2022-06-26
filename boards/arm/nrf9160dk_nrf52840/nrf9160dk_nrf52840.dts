@@ -52,7 +52,7 @@
 		vcom0_pins_routing: switch-nrf91-uart1 {
 			compatible = "nordic,nrf9160dk-optional-routing";
 			control-gpios = <&gpio1 14 GPIO_ACTIVE_LOW>;
-			status = "okay";
+			status = "disabled";
 		};
 
 		vcom2_pins_routing: switch-nrf91-uart2 {
@@ -63,55 +63,55 @@
 			 */
 			control-gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>,
 					<&gpio0 12 GPIO_ACTIVE_HIGH>;
-			status = "okay";
+			status = "disabled";
 		};
 
 		led1_pin_routing: switch-nrf91-led1 {
 			compatible = "nordic,nrf9160dk-optional-routing";
 			control-gpios = <&gpio1 5 GPIO_ACTIVE_LOW>;
-			status = "okay";
+			status = "disabled";
 		};
 
 		led2_pin_routing: switch-nrf91-led2 {
 			compatible = "nordic,nrf9160dk-optional-routing";
 			control-gpios = <&gpio1 7 GPIO_ACTIVE_LOW>;
-			status = "okay";
+			status = "disabled";
 		};
 
 		led3_pin_routing: switch-nrf91-led3 {
 			compatible = "nordic,nrf9160dk-optional-routing";
 			control-gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
-			status = "okay";
+			status = "disabled";
 		};
 
 		led4_pin_routing: switch-nrf91-led4 {
 			compatible = "nordic,nrf9160dk-optional-routing";
 			control-gpios = <&gpio1 3 GPIO_ACTIVE_LOW>;
-			status = "okay";
+			status = "disabled";
 		};
 
 		switch1_pin_routing: switch-nrf91-switch1 {
 			compatible = "nordic,nrf9160dk-optional-routing";
 			control-gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;
-			status = "okay";
+			status = "disabled";
 		};
 
 		switch2_pin_routing: switch-nrf91-switch2 {
 			compatible = "nordic,nrf9160dk-optional-routing";
 			control-gpios = <&gpio0 8 GPIO_ACTIVE_LOW>;
-			status = "okay";
+			status = "disabled";
 		};
 
 		button1_pin_routing: switch-nrf91-button1 {
 			compatible = "nordic,nrf9160dk-optional-routing";
 			control-gpios = <&gpio0 6 GPIO_ACTIVE_LOW>;
-			status = "okay";
+			status = "disabled";
 		};
 
 		button2_pin_routing: switch-nrf91-button2 {
 			compatible = "nordic,nrf9160dk-optional-routing";
 			control-gpios = <&gpio0 26 GPIO_ACTIVE_LOW>;
-			status = "okay";
+			status = "disabled";
 		};
 
 		nrf_interface_pins_0_2_routing: switch-nrf-if0-2-ctrl {
@@ -154,10 +154,10 @@
 	compatible = "nordic,nrf-uarte";
 	current-speed = <115200>;
 	status = "okay";
-	tx-pin = <5>;
-	rx-pin = <3>;
-	rts-pin = <40>;
-	cts-pin = <7>;
+	tx-pin = <41>;
+	rx-pin = <40>;
+	rts-pin = <32>;
+	cts-pin = <33>;
 };
 
 &flash0 {

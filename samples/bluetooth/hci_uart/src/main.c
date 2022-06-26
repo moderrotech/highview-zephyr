@@ -27,6 +27,144 @@
 #include <bluetooth/buf.h>
 #include <bluetooth/hci_raw.h>
 
+
+
+// ********************************************************************************************** begin
+// Kai: for firmware version report
+
+#define MY_BLE_MANUFACTURE_TESTING_MODE	false
+
+// firmware version
+#if MY_BLE_MANUFACTURE_TESTING_MODE
+#define KAI_VERSION_MAJOR		0
+#define KAI_VERSION_MINOR		0
+#define KAI_VERSION_BUILD		1
+#else
+#define KAI_VERSION_MAJOR		2
+#define KAI_VERSION_MINOR		0
+#define KAI_VERSION_BUILD		6
+#endif
+
+// It used to work by modifying vs_read_version_info() in hci.c. However it works for Zephyr BLE controller only, not for SoftDevice Controller. That's why we need the following code.
+static inline bool my_hci_op_vs_read_version_info(struct net_buf *buf, const struct device *uart_dev)
+{
+	// check if it is BT_HCI_OP_VS_READ_VERSION_INFO (0xfc01)
+	{
+		uint8_t *p2 = buf->data;
+		if (	buf->len != 3 || 		// length of total
+			p2[0] != 1 || 		// opcode-1
+			p2[1] != 0xfc || 		// opcode-2
+			p2[2] != 0)			// length of payload
+			return false;
+	}
+	
+	static uint8_t cmd[24];
+	uint8_t *p3 = cmd;
+	*p3 = 0x04;					p3 ++;		// type: H4_EVT
+	*p3 = 0x0e;					p3 ++;		// event: BT_HCI_EVT_CMD_COMPLETE
+								p3 ++;		// length of payload
+	*p3 = 0x01;					p3 ++;		// ncmd (payload starts here)
+	*p3 = 0x01;					p3 ++;		// opcode: BT_HCI_OP_VS_READ_VERSION_INFO
+	*p3 = 0xfc;					p3 ++;		// opcode
+	*p3 = 0x00;					p3 ++;		// bt_hci_rp_vs_read_version_info -- status
+	*p3 = 0x00;					p3 ++;		// hw_platform - 1
+	*p3 = 0x00;					p3 ++;		// hw_platform - 2
+	*p3 = 0x00;					p3 ++;		// hw_variant - 1
+	*p3 = 0x00;					p3 ++;		// hw_variant - 2
+	*p3 = 0x00;					p3 ++;		// fw_variant
+	*p3 = KAI_VERSION_MAJOR;	p3 ++;		// fw_version
+	*p3 = KAI_VERSION_MINOR;	p3 ++;		// fw_revision - 1
+	*p3 = 0x00;					p3 ++;		// fw_revision - 2
+	*p3 = KAI_VERSION_BUILD;		p3 ++;		// fw_build - 1
+	*p3 = 0x00;					p3 ++;		// fw_build - 2
+	*p3 = 0x00;					p3 ++;		// fw_build - 3
+	*p3 = 0x00;					p3 ++;		// fw_build - 4
+	uint32_t cmd_len = (uint32_t) (p3 - cmd);
+	cmd[2] = cmd_len - 3;
+	int sent_len = uart_fifo_fill(uart_dev, cmd, cmd_len);
+	printk("%s() sent %d bytes\n", __FUNCTION__, sent_len);
+	return true;
+}
+
+// **********************************************************************************************  end
+
+
+
+// ********************************************************************************************** begin
+// Kai: code for upgrading 52840 firmware
+
+#include <drivers/gpio.h>
+#include <dfu/mcuboot.h>
+#include <dfu/lte_uart_dfu.h>
+
+#define MY_GPIO_HOST_UPGRADE_52840	15
+
+static inline void my_check_upgrade(void)
+{
+	int gpio_status;
+	const struct device *gpio_dev = device_get_binding("GPIO_0");
+	if (gpio_dev == 0) 
+		printk("ERROR: %s(): GPIO bind\n", __FUNCTION__);
+	gpio_pin_configure(gpio_dev, MY_GPIO_HOST_UPGRADE_52840, GPIO_INPUT);
+	k_sleep(K_MSEC(100));
+	gpio_status = gpio_pin_get_raw(gpio_dev, MY_GPIO_HOST_UPGRADE_52840);
+	if (gpio_status == 1)
+	{
+		printk("start upgrade...\n");
+		lte_uart_dfu_start();		// this function won't return
+	}
+}
+
+// **********************************************************************************************  end
+
+
+
+// ********************************************************************************************** begin
+// Kai: code for manufacture testing
+
+#if MY_BLE_MANUFACTURE_TESTING_MODE
+
+static void my_manufacture_test_gpio(void)
+{
+	printk("manufacture testing GPIO begin\n");
+
+	const struct device *gpio_dev = device_get_binding("GPIO_0");
+	if (gpio_dev == 0) 
+		printk("ERROR: %s(): GPIO bind\n", __FUNCTION__);
+
+	uint32_t gpio_list[] = {2, 13, 14, 15};
+	uint32_t gpio_num = sizeof(gpio_list) / sizeof(gpio_list[0]);
+
+	for (int k=0; k < gpio_num; k++)
+	{
+		gpio_pin_configure(gpio_dev, gpio_list[k], GPIO_OUTPUT_LOW);
+	}
+
+	int value = 1;
+	for (int n=0; n < 5; n++)
+	{
+		k_sleep(K_MSEC(200));
+		for (int k=0; k < gpio_num; k++)
+		{
+			gpio_pin_set_raw(gpio_dev, gpio_list[k], value);
+		}
+		if (value)
+			value = 0;
+		else
+			value = 1;
+	}
+
+	k_sleep(K_MSEC(1000));
+	printk("manufacture testing GPIO end\n");
+}
+
+#endif
+
+// **********************************************************************************************  end
+
+
+
+
 #define LOG_MODULE_NAME hci_uart
 LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 
@@ -233,11 +371,20 @@ static void tx_thread(void *p1, void *p2, void *p3)
 
 		/* Wait until a buffer is available */
 		buf = net_buf_get(&tx_queue, K_FOREVER);
-		/* Pass buffer to the stack */
-		err = bt_send(buf);
-		if (err) {
-			LOG_ERR("Unable to send (err %d)", err);
+
+
+		// added by Kai
+		if (my_hci_op_vs_read_version_info(buf, hci_uart_dev))
+		{
 			net_buf_unref(buf);
+		} else
+		{
+			/* Pass buffer to the stack */
+			err = bt_send(buf);
+			if (err) {
+				LOG_ERR("Unable to send (err %d)", err);
+				net_buf_unref(buf);
+			}
 		}
 
 		/* Give other threads a chance to run if tx_queue keeps getting
@@ -329,6 +476,32 @@ SYS_DEVICE_DEFINE("hci_uart", hci_uart_init, NULL,
 
 void main(void)
 {
+
+// ********************************************************************************************** begin
+// Kai: code for manufacture testing
+
+#if MY_BLE_MANUFACTURE_TESTING_MODE
+	my_manufacture_test_gpio();
+#endif
+
+// ********************************************************************************************** end
+
+
+
+// ********************************************************************************************** begin
+// Kai: code for upgrading 52840 firmware
+
+	printk("BLE app v%u.%u.%u\n", KAI_VERSION_MAJOR, KAI_VERSION_MINOR, KAI_VERSION_BUILD);
+
+	// mark application upgrade success (automatically check if needed inside this function)
+	boot_write_img_confirmed();
+	
+	my_check_upgrade();
+
+// ********************************************************************************************** end
+
+
+
 	/* incoming events and data from the controller */
 	static K_FIFO_DEFINE(rx_queue);
 	int err;
