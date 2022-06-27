@@ -1175,7 +1175,6 @@ static struct nvs_fs my_nvs_fs;
 
 // description:
 //     we do nothing !!!
-/*
 int my_nvs_clear(void)
 {
 	printk("[NVS] CLEAR\n");
@@ -1187,7 +1186,6 @@ int my_nvs_clear(void)
 	k_mutex_unlock(&my_nvs_lock);
 	return result;
 }
-*/
 
 
 // description:
