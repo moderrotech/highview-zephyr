@@ -12,6 +12,7 @@
 #include "settings/settings_nvs.h"
 #include "settings_priv.h"
 #include <storage/flash_map.h>
+#include <fs/my_nvs.h>
 
 #include <logging/log.h>
 LOG_MODULE_DECLARE(settings, CONFIG_SETTINGS_LOG_LEVEL);

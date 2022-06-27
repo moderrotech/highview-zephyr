@@ -823,6 +823,7 @@ end:
 	return rc;
 }
 
+static
 int nvs_clear(struct nvs_fs *fs)
 {
 	int rc;
@@ -847,6 +848,7 @@ int nvs_clear(struct nvs_fs *fs)
 	return 0;
 }
 
+static
 int nvs_init(struct nvs_fs *fs, const char *dev_name)
 {
 
@@ -912,6 +914,7 @@ int nvs_init(struct nvs_fs *fs, const char *dev_name)
 	return 0;
 }
 
+static
 ssize_t nvs_write(struct nvs_fs *fs, uint16_t id, const void *data, size_t len)
 {
 	int rc, gc_count;
@@ -1030,11 +1033,13 @@ end:
 	return rc;
 }
 
+static
 int nvs_delete(struct nvs_fs *fs, uint16_t id)
 {
 	return nvs_write(fs, id, NULL, 0);
 }
 
+static
 ssize_t nvs_read_hist(struct nvs_fs *fs, uint16_t id, void *data, size_t len,
 		      uint16_t cnt)
 {
@@ -1092,6 +1097,7 @@ err:
 	return rc;
 }
 
+static
 ssize_t nvs_read(struct nvs_fs *fs, uint16_t id, void *data, size_t len)
 {
 	int rc;
@@ -1100,6 +1106,7 @@ ssize_t nvs_read(struct nvs_fs *fs, uint16_t id, void *data, size_t len)
 	return rc;
 }
 
+static
 ssize_t nvs_calc_free_space(struct nvs_fs *fs)
 {
 
@@ -1155,3 +1162,94 @@ ssize_t nvs_calc_free_space(struct nvs_fs *fs)
 	}
 	return free_space;
 }
+
+
+
+
+//********************************************************************************************* added by Kai begin
+
+static bool my_nvs_inited = false;
+static struct k_mutex my_nvs_lock;
+static struct nvs_fs my_nvs_fs;
+
+
+// description:
+//     we do nothing !!!
+/*
+int my_nvs_clear(void)
+{
+	printk("[NVS] CLEAR\n");
+
+	return 0;  
+	
+	k_mutex_lock(&my_nvs_lock, K_FOREVER);
+	int result = nvs_clear(&my_nvs_fs);
+	k_mutex_unlock(&my_nvs_lock);
+	return result;
+}
+*/
+
+
+// description:
+//     this API is called twice: 
+//         1) called in the very begining of main()
+//         2) called in bt_enable()
+int my_nvs_init(struct nvs_fs *fs, const char *dev_name)
+{
+	printk("[NVS] INIT: addr=0x%x sectorSize=%d sectors=%d devName=\"%s\"\n", (unsigned int)fs->offset, fs->sector_size, fs->sector_count, dev_name);
+	if (my_nvs_inited)
+	{
+		printk("[NVS] INIT: done before\n");
+		return 0;
+	}
+	my_nvs_inited = true;
+	k_mutex_init(&my_nvs_lock);
+	memcpy(&my_nvs_fs, fs, sizeof(struct nvs_fs));
+	int ret = nvs_init(&my_nvs_fs, dev_name);
+	if (ret)
+		printk("[NVS] INIT: ERR\n");
+	else
+		printk("[NVS] INIT: OK\n");
+	return ret;
+}
+
+
+ssize_t my_nvs_write(uint16_t id, const void *data, size_t len)
+{
+//	printk("[NVS] WR: len=%u\n", len);
+	k_mutex_lock(&my_nvs_lock, K_FOREVER);
+	ssize_t result = nvs_write(&my_nvs_fs, id, data, len);
+	k_mutex_unlock(&my_nvs_lock);
+	return result;
+}
+
+
+int my_nvs_delete(uint16_t id)
+{
+//	printk("[NVS] DELETE: id=%u\n", id);
+	k_mutex_lock(&my_nvs_lock, K_FOREVER);
+	int result = nvs_delete(&my_nvs_fs, id);
+	k_mutex_unlock(&my_nvs_lock);
+	return result;
+}
+
+ssize_t my_nvs_read(uint16_t id, void *data, size_t len)
+{
+//	printk("[NVS] RD: len=%u\n", len);
+	k_mutex_lock(&my_nvs_lock, K_FOREVER);
+	ssize_t result = nvs_read(&my_nvs_fs, id, data, len);
+	k_mutex_unlock(&my_nvs_lock);
+	return result;
+}
+
+ssize_t my_nvs_calc_free_space(void)
+{
+	printk("[NVS] SPACE\n");
+	k_mutex_lock(&my_nvs_lock, K_FOREVER);
+	ssize_t result = nvs_calc_free_space(&my_nvs_fs);
+	k_mutex_unlock(&my_nvs_lock);
+	return result;
+}
+
+//********************************************************************************************* added by Kai end
+

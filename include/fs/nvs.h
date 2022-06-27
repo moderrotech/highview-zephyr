@@ -59,6 +59,10 @@ struct nvs_fs {
 	const struct flash_parameters *flash_parameters;
 };
 
+
+#if 0
+
+
 /**
  * @}
  */
@@ -173,6 +177,18 @@ ssize_t nvs_calc_free_space(struct nvs_fs *fs);
 /**
  * @}
  */
+
+
+#endif
+
+
+int my_nvs_init(struct nvs_fs *fs, const char *dev_name);
+ssize_t my_nvs_write(uint16_t id, const void *data, size_t len);
+int my_nvs_delete(uint16_t id);
+ssize_t my_nvs_read(uint16_t id, void *data, size_t len);
+ssize_t my_nvs_calc_free_space(void);
+
+
 
 #ifdef __cplusplus
 }
