@@ -42,7 +42,7 @@
 #else
 #define KAI_VERSION_MAJOR		2
 #define KAI_VERSION_MINOR		0
-#define KAI_VERSION_BUILD		7
+#define KAI_VERSION_BUILD		8
 #endif
 
 // It used to work by modifying vs_read_version_info() in hci.c. However it works for Zephyr BLE controller only, not for SoftDevice Controller. That's why we need the following code.
